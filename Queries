@@ -1,0 +1,217 @@
+/*
+	Instagram Data Exploration 
+	
+	Skills used: Joins, Windows Functions, Aggregate Functions
+	
+	*/
+
+Using this below Kaggle Instagram dataset, find the following
+https://www.kaggle.com/datasets/shmalex/instagram-dataset
+________________________________________
+
+1. Top 100 users with max number of posts in a given time period week on week and then month on month timeframe.
+
+SELECT 
+  p.profile_id, 
+  pr.profile_name, 
+  COUNT(*) AS posts 
+FROM 
+  instagram_posts AS p 
+  JOIN instagram_profiles AS pr ON p.profile_id = pr.profile_id 
+WHERE 
+  p.cts BETWEEN '2018-01-01' 
+  AND '2018-01-08' 
+GROUP BY 
+  p.profile_id, 
+  pr.profile_name 
+ORDER BY posts DESC 
+LIMIT 100;
+
+________________________________________
+
+2. Top 10 Geo locations where most of the active users are there (You can assume any timeframe, any 1w is good time)
+
+SELECT 
+  l.dir_country_name as country, 
+  count(*) as number_of_users 
+FROM 
+  Instagram_posts AS p 
+  JOIN instagram_profiles AS pr ON p.profile_id = pr.profile_id 
+  JOIN instagram_locations AS l ON p.location_id = l.id 
+WHERE 
+  p.cts BETWEEN '2018-01-01' 
+  AND '2018-01-08' 
+GROUP BY 
+  l.dir_country_name 
+ORDER BY number_of_users DESC 
+LIMIT 10;
+
+________________________________________
+
+3. Top 100 users with max followers and max number of posts (Time - any 1w)
+
+SELECT 
+  p.sid, 
+  p.sid_profile, 
+  p.post_id, 
+  p.profile_id, 
+  p.location_id, 
+  p.cts, 
+  p.post_type, 
+  p.description, 
+  p.numbr_likes, 
+  p.number_comments 
+FROM 
+  Instagram_posts AS p 
+  JOIN instagram_profiles AS pr ON p.sid = pr.sid 
+WHERE 
+  pr.followers = (
+    SELECT 
+      MAX(followers) FROM instagram_profiles) 
+  AND pr.n_posts = (
+    SELECT 
+      MAX(n_posts) FROM instagram_profiles) 
+ORDER BY p.sid DESC 
+LIMIT 100;
+
+________________________________________
+
+4. Top 100 trending posts with the user profile information.
+
+SELECT 
+  p.sid, 
+  p.sid_profile, 
+  p.post_id, 
+  p.profile_id, 
+  p.location_id, 
+  p.cts, 
+  p.post_type, 
+  p.description, 
+  p.numbr_likes, 
+  p.number_comments, 
+  pr.profile_name, 
+  pr.firstname_lastname, 
+  pr.description, 
+  pr.following, 
+  pr.followers, 
+  pr.n_posts, 
+  pr.url, 
+  pr.cts, 
+  pr.is_business_account 
+FROM 
+  instagram_posts AS p 
+  JOIN instagram_profiles AS pr ON p.sid_profile = pr.sid 
+ORDER BY p.numbr_likes DESC 
+LIMIT 100;
+
+________________________________________
+
+5. Top 100 Business accounts which has max number of likes on their posts.
+
+SELECT 
+  p.post_id, 
+  p.profile_id, 
+  p.location_id, 
+  p.cts, 
+  p.post_type, 
+  p.description, 
+  p.numbr_likes, 
+  p.number_comments 
+FROM 
+  Instagram_posts AS p 
+  JOIN instagram_profiles AS pr ON p.sid_profile = pr.sid
+WHERE pr.is_business_account = true 
+ORDER BY p.numbr_likes DESC 
+LIMIT 100;
+________________________________________
+6. Top 100 posts with max number of comments with the user name.
+
+SELECT 
+  pr.profile_name, 
+  pr.firstname_lastname, 
+  pr.description, 
+  pr.following, 
+  pr.followers, 
+  pr.n_posts, 
+  pr.url, 
+  pr.cts, 
+  pr.is_business_account, 
+  MAX(p.number_comments) AS max_comments 
+FROM 
+  instagram_posts AS p 
+  JOIN instagram_profiles AS pr ON p.sid_profile = pr.sid 
+GROUP BY 
+  pr.profile_name, 
+  pr.firstname_lastname, 
+  pr.description, 
+  pr.following, 
+  pr.followers, 
+  pr.n_posts, 
+  pr.url, 
+  pr.cts, 
+  pr.is_business_account 
+ORDER BY max_comments DESC 
+LIMIT 100;
+
+________________________________________
+
+7. Most active 10 users in doing comments across this dataset.
+
+SELECT 
+  profile_name, 
+  firstname_lastname, 
+  sum(number_comments) AS total_comments 
+FROM 
+  Instagram_posts AS p 
+  JOIN instagram_profiles AS pr ON p.profile_id = pr.profile_id 
+GROUP BY 
+  profile_name, 
+  firstname_lastname 
+ORDER BY total_comments DESC 
+LIMIT 10;
+
+________________________________________
+
+8. Average number of posts week on week basis on Instagram.
+
+SELECT 
+  ROUND(AVG(n_posts), 2) AS avg_posts, 
+  EXTRACT(WEEK FROM cts) AS week 
+FROM 
+  instagram_profiles 
+GROUP BY EXTRACT(WEEK FROM cts) 
+ORDER BY week;
+
+________________________________________
+
+9. Average number of comments on posts week on week basis on Instagram.
+
+SELECT 
+  ROUND(AVG(number_comments), 2) AS avg_comments, 
+  EXTRACT(WEEK FROM cts) AS week 
+FROM 
+  instagram_posts 
+GROUP BY 
+  EXTRACT(WEEK FROM cts) 
+ORDER BY week;
+
+________________________________________
+
+10. Top 100 users top 10 posts which has most active conversations.
+
+SELECT 
+  t.profile_id, 
+  t.numbr_likes, 
+  t.number_comments, 
+  t.rn 
+FROM 
+  (SELECT 
+      *, RANK() OVER (PARTITION BY profile_id ORDER BY number_comments DESC
+      ) AS rn 
+    FROM 
+      instagram_posts) t 
+WHERE rn <= 10 
+ORDER BY rn ASC
+
+________________________________________
+
