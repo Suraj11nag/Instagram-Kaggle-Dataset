@@ -1,9 +1,9 @@
 /*
-	Instagram Data Exploration 
+Instagram Data Exploration 
 	
-	Skills used: Joins, Windows Functions, Aggregate Functions
+Skills used: Joins, Windows Functions, Aggregate Functions
 	
-	*/
+*/
 
 Using this below Kaggle Instagram dataset, find the following
 https://www.kaggle.com/datasets/shmalex/instagram-dataset
@@ -29,7 +29,7 @@ LIMIT 100;
 
 ________________________________________
 
-2. Top 10 Geo locations where most of the active users are there (You can assume any timeframe, any 1w is good time)
+2. Top 10 Geo locations where most of the active users are there (You can assume any timeframe.
 
 SELECT 
   l.dir_country_name as country, 
@@ -48,7 +48,7 @@ LIMIT 10;
 
 ________________________________________
 
-3. Top 100 users with max followers and max number of posts (Time - any 1w)
+3. Top 100 users with max followers and max number of posts.
 
 SELECT 
   p.sid, 
